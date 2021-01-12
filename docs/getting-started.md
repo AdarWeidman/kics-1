@@ -5,14 +5,20 @@ There are multiple ways to get KICS up and running:
 
 ### Docker
 
-KICS is available as a [Docker image](https://hub.docker.com/r/checkmarx/kics) and can be used as follows:  
+KICS is available as a [Docker image](https://hub.docker.com/r/checkmarx/kics) and can be used as follows:
 
 To scan a directory/file on your host you have to mount it as a volume to the container and specify the path on the container filesystem with the -p KICS parameter (see CLI Options section below)
 
-```txt
-docker pull checkmarx/kics:latest  
-docker run -v {​​​​path_to_host_folder_to_scan}​​​​:/path checkmarx/kics:latest -p "/path" -o "/path/results.json"
-```  
+```sh
+docker pull checkmarx/kics:latest
+docker run --user "$(id -u):$(id -g)" -v {​​​​path_to_host_folder_to_scan}​​​​:/path checkmarx/kics:latest -p "/path" -o "/path/results.json"
+```
+
+You can also use the provided example docker-compose file:
+
+```sh
+CURRENT_UID="$(id -u):$(id -g)" docker-compose up --build
+```
 
 You can provide your own path to the queries directory with `-q` CLI option (see CLI Options section below), otherwise the default directory will be used The default *./assets/queries* is built-in in the image.
 
@@ -27,22 +33,22 @@ So all you need is:
 1. Go to [KICS releases](https://github.com/Checkmarx/kics/releases/latest)
 1. Download KICS binaries based on your OS
 1. Extract files
-1. Run kics executable with the cli options as described below (note that kics binary should be located in the same directory as queries directory)  
+1. Run kics executable with the cli options as described below (note that kics binary should be located in the same directory as queries directory)
    ```
    ./kics -p <path-of-your-project-to-scan> -o <output-results.json>
    ```
 
 ### Build from Sources
 
-1. Download and install Go from [https://golang.org/dl/](https://golang.org/dl/)  
-1. Clone the repository:  
+1. Download and install Go from [https://golang.org/dl/](https://golang.org/dl/)
+1. Clone the repository:
    ```
    git clone https://github.com/Checkmarx/kics.git
-   ```  
+   ```
    ```
    cd kics
    ```
-1. Kick a scan!  
+1. Kick a scan!
    ```
    go run ./cmd/console/main.go -p <path-of-your-project-to-scan> -o <output-results.json>
    ```

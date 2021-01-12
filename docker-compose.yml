@@ -2,6 +2,7 @@ version: "3"
 
 services:
   kics:
+    user: "${CURRENT_UID}"
     platform: linux
     image: checkmarx/kics
     container_name: kics
