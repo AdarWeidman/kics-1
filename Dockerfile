@@ -2,7 +2,6 @@ FROM golang:1.15.3-alpine3.12 as build_env
 
 # Create a group and user
 RUN addgroup -S Checkmarx && adduser -S Checkmarx -G Checkmarx
-USER Checkmarx
 
 # Copy the source from the current directory to the Working Directory inside the container
 WORKDIR /app
@@ -20,7 +19,6 @@ RUN go mod download
 # COPY the source code as the last step
 COPY . .
 
-USER root
 # Build the Go app
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o bin/kics cmd/console/main.go
 USER Checkmarx
@@ -31,15 +29,16 @@ HEALTHCHECK CMD wget -q --method=HEAD localhost/system-status.txt
 #runtime image
 FROM scratch
 
-COPY --from=build_env /app/bin/kics /app/bin/kics
-COPY --from=build_env /app/assets/ /app/bin/assets/
 COPY --from=build_env /etc/passwd /etc/passwd
-USER Checkmarx
+COPY --from=build_env /etc/group /etc/group
+COPY --chown=Checkmarx:Checkmarx --from=build_env /app/bin/kics /app/bin/kics
+COPY --chown=Checkmarx:Checkmarx --from=build_env /app/assets/ /app/bin/assets/
 
 WORKDIR /app/bin
 
 #Healthcheck the container
 HEALTHCHECK CMD wget -q --method=HEAD localhost/system-status.txt
 
+USER Checkmarx
 # Command to run the executable
 ENTRYPOINT ["/app/bin/kics"]
